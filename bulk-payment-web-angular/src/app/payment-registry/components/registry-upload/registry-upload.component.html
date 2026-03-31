@@ -1,0 +1,108 @@
+<div class="upload-container">
+  <h2>Массовая загрузка реестра платежей</h2>
+
+  @if (!uploadProgress && payments.length === 0) {
+    <div class="file-drop-wrapper">
+      <ngx-file-drop
+        dropZoneLabel="Перетащите файл сюда"
+        (onFileDrop)="dropped($event)"
+        [multiple]="false"
+        accept=".xls,.xlsx"
+        dropZoneClassName="my-custom-dropzone"
+        contentClassName="my-custom-content"
+      >
+        <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+          <div class="dropzone-content">
+            <svg
+              width="50"
+              height="50"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+            </svg>
+
+            @if (!selectedFile) {
+              <p>Перетащите файл Excel сюда или выберите вручную</p>
+            } @else {
+              <p class="selected-file">
+                Готов к загрузке: <strong>{{ selectedFile.name }}</strong>
+              </p>
+            }
+
+            <button type="button" class="btn-browse" (click)="openFileSelector()">
+              Выбрать файл
+            </button>
+          </div>
+        </ng-template>
+      </ngx-file-drop>
+    </div>
+  }
+
+  @if (selectedFile && !uploadProgress) {
+    <button class="btn-upload" (click)="uploadFile()">Начать обработку</button>
+  }
+
+  @if (uploadProgress && uploadProgress.status !== 'Completed') {
+    <div class="progress-section">
+      <h3>Статус обработки: {{ uploadProgress.status }}</h3>
+      <div class="progress-bar-container">
+        <div class="progress-bar" [style.width.%]="uploadProgress.percent"></div>
+      </div>
+      <div class="progress-stats">
+        <span>Обработано: {{ uploadProgress.processedRows }} / {{ uploadProgress.totalRows }}</span>
+        @if (uploadProgress.errorCount > 0) {
+          <span class="error-text">Ошибок: {{ uploadProgress.errorCount }}</span>
+        }
+        <span>{{ uploadProgress.percent }}%</span>
+      </div>
+    </div>
+  }
+</div>
+
+@if (payments.length > 0) {
+  <div class="results-section">
+    <h3>Результаты обработки реестра</h3>
+
+    <div class="table-wrapper">
+      <table class="payment-table">
+        <thead>
+          <tr>
+            <th>Id реестра</th>
+            <th>Статус</th>
+            <th>ИНН Плат.</th>
+            <th>Счет Плат.</th>
+            <th>ИНН Получ.</th>
+            <th>Счет Получ.</th>
+            <th>БИК</th>
+            <th>Сумма</th>
+            <th>Назначение</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of payments; track $index) {
+            <tr [class.row-error]="!p.isValid">
+              <td>{{ p.registryId }}</td>
+              <td class="status-cell">
+                @if (p.isValid) {
+                  <span class="icon-success" title="Валиден">✔</span>
+                } @else {
+                  <span class="icon-error" [title]="p.validationError">✘</span>
+                }
+              </td>
+              <td>{{ p.payerInn }}</td>
+              <td>{{ p.payerAccount }}</td>
+              <td>{{ p.receiverInn }}</td>
+              <td>{{ p.receiverAccount }}</td>
+              <td>{{ p.receiverBik }}</td>
+              <td class="amount-cell">{{ p.amount | currency: 'RUB' : 'symbol-narrow' }}</td>
+              <td class="purpose-cell" [title]="p.purpose">{{ p.purpose }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
