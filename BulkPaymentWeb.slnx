@@ -1,1 +1,6 @@
-<Solution />
+<Solution>
+  <Project Path="BulkPaymentWeb.Api/BulkPaymentWeb.Api.csproj" Id="4e621624-d395-4032-9de7-756a83e2796f" />
+  <Project Path="BulkPaymentWeb.Application/BulkPaymentWeb.Application.csproj" Id="4fd3d24f-d796-46ae-9e4a-d8b8266c303f" />
+  <Project Path="BulkPaymentWeb.Domain/BulkPaymentWeb.Domain.csproj" Id="55959909-d50c-4730-a2f2-c369ebc58d24" />
+  <Project Path="BulkPaymentWeb.Infrastructure/BulkPaymentWeb.Infrastructure.csproj" Id="ca2ae987-94fa-47fa-b449-c3b66ecae2ca" />
+</Solution>
