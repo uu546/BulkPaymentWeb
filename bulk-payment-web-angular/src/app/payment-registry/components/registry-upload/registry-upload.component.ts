@@ -97,7 +97,7 @@ export class RegistryUploadComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {   
+  ngOnDestroy(): void {
     this.signalRService.stopConnection();
   }
 }

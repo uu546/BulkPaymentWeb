@@ -13,25 +13,23 @@ import { PaymentOutput } from '../models/output/payment-output';
 export class SignalrService {
   private hubConnection: HubConnection | null = null;
   public progress$ = new BehaviorSubject<ProcessingProgressOutput | null>(null);
- public error$ = new BehaviorSubject<string | null>(null);
- 
+  public error$ = new BehaviorSubject<string | null>(null);
+
   constructor() {}
 
   public async startConnection(registryId: number): Promise<void> {
     // Если уже подключены - ничего не делаем
     console.log(this.hubConnection);
 
-    if (this.hubConnection && this.hubConnection.state !== HubConnectionState.Disconnected) {
-      return;
-    }
+    // if (this.hubConnection && this.hubConnection.state !== HubConnectionState.Disconnected) {
+    //   return;
+    // }
 
-    if (!this.hubConnection) {
+    // if (!this.hubConnection) {
       this.hubConnection = new HubConnectionBuilder()
-        .withUrl('http://localhost:5000/hubs/payments'
-          , {
+        .withUrl('http://localhost:5000/hubs/payments', {
           transport: HttpTransportType.ServerSentEvents,
-        }
-      )
+        })
         .withAutomaticReconnect()
         .build();
 
@@ -40,11 +38,11 @@ export class SignalrService {
         this.progress$.next(data);
       });
 
-      this.hubConnection.on("ErrorMessage",(error) => {
-        console.error("Ошибка с метода UpdateProgress:", error);
+      this.hubConnection.on('ErrorMessage', (error) => {
+        console.error('Ошибка с метода UpdateProgress:', error);
         this.error$.next(error);
-      })
-    }
+      });
+    // }
 
     try {
       this.hubConnection.start().then(() => {
@@ -62,9 +60,12 @@ export class SignalrService {
     if (this.hubConnection?.state !== HubConnectionState.Connected) {
       throw new Error('SignalR не подключен!');
     }
-    const result = await this.hubConnection.invoke<PaymentOutput[]>('GetPaymentsByRegistryIdAsync', registryId);
+    const result = await this.hubConnection.invoke<PaymentOutput[]>(
+      'GetPaymentsByRegistryIdAsync',
+      registryId,
+    );
 
-    console.log(`Получен список платежей реестра Id: ${registryId}`, result)
+    console.log(`Получен список платежей реестра Id: ${registryId}`, result);
     return result;
   }
 
