@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { NgxFileDropEntry, NgxFileDropModule } from 'ngx-file-drop';
-import { BehaviorSubject } from 'rxjs';
 import { ProcessingProgressOutput } from '../../models/output/processing-progress-output';
 import { PaymentService } from '../../services/payment.service';
 import { SignalrService } from '../../services/signalr.service';
@@ -16,25 +15,28 @@ export class RegistryUploadComponent implements OnInit, OnDestroy {
   public selectedFile: File | null = null;
   public uploadProgress: ProcessingProgressOutput | null = null;
   public payments: any[] = [];
-
-  private progress$ = new BehaviorSubject<ProcessingProgressOutput | null>(null);
+  public globalError: string | null = null;
 
   constructor(
     private paymentService: PaymentService,
     private signalRService: SignalrService,
     private cdr: ChangeDetectorRef,
-  ) {
-    this.progress$ = this.signalRService.progress$;
-  }
+  ) {}
 
   ngOnInit() {
     this.signalRService.progress$.subscribe((progress) => {
       this.uploadProgress = progress;
-      if (this.progress$.value?.status === 'Completed') {
-        this.fetchFinalPayments(this.progress$.value!.registryId);
+      if (this.uploadProgress?.status === 'Completed') {
+        this.getFinalPayments(this.uploadProgress!.registryId);
       }
 
       this.cdr.detectChanges(); // Принудительно обновляем экран
+    });
+
+    this.signalRService.error$.subscribe((errMessage) => {
+      this.globalError = errMessage;
+      this.uploadProgress = null;
+      this.cdr.detectChanges();
     });
   }
 
@@ -61,7 +63,7 @@ export class RegistryUploadComponent implements OnInit, OnDestroy {
       alert('Пожалуйста, загрузите файл формата Excel.');
       return;
     }
-
+    this.globalError = null;
     this.selectedFile = file;
     this.uploadProgress = null;
     this.payments = [];
@@ -79,20 +81,23 @@ export class RegistryUploadComponent implements OnInit, OnDestroy {
     });
   }
 
-  private fetchFinalPayments(registryId: number): void {
-    this.paymentService.getPayments(registryId).subscribe({
-      next: (data) => {
-        this.payments = data;
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.error('Ошибка загрузки итогов:', err),
-    });
+  private async getFinalPayments(registryId: number): Promise<void> {
+    try {
+      console.log('Запрашиваем итоги через SignalR Hub...');
+
+      const data = await this.signalRService.getFinalPayments(registryId);
+
+      console.log('Данные получены через хаб:', data);
+
+      this.payments = data;
+
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Ошибка загрузки итогов через хаб:', err);
+    }
   }
 
-  ngOnDestroy(): void {
-    if (this.progress$.value?.registryId) {
-      this.progress$.unsubscribe();
-    }
+  ngOnDestroy(): void {   
     this.signalRService.stopConnection();
   }
 }

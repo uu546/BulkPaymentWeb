@@ -12,7 +12,7 @@ namespace BulkPaymentWeb.Infrastructure.Services
     public class ExcelParserService : IExcelParserService
     {
         /// <inheritdoc />
-        public List<PaymentItemEntity> ParseStream(Stream stream, int registryId)
+        public IEnumerable<PaymentItemEntity> ParseStream(Stream stream, int registryId)
         {
             List<PaymentItemEntity> payments = new List<PaymentItemEntity>();
 

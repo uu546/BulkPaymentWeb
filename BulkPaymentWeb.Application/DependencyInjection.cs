@@ -1,4 +1,6 @@
-﻿using BulkPaymentWeb.Application.Interfaces.Validator;
+﻿using BulkPaymentWeb.Application.Interfaces.Services.Payment;
+using BulkPaymentWeb.Application.Interfaces.Validator;
+using BulkPaymentWeb.Application.Services.Payment;
 using BulkPaymentWeb.Application.Validator;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +30,7 @@ namespace BulkPaymentWeb.Application
         private static void ServicesInit(IServiceCollection services)
         {
             services.AddScoped<IPaymentValidator, PaymentValidator>();
+            services.AddScoped<IPaymentService, PaymentService>();
         }
     }
 }

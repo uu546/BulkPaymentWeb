@@ -10,13 +10,13 @@ namespace BulkPaymentWeb.Infrastructure.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<PaymentRegistryEntity> Registries { get; set; }
+        public DbSet<RegistryEntity> Registries { get; set; }
 
         public DbSet<PaymentItemEntity> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<PaymentRegistryEntity>(entity =>
+            modelBuilder.Entity<RegistryEntity>(entity =>
             {
                 entity.ToTable("registries");
 

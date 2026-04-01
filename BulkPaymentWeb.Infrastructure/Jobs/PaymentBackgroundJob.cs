@@ -2,8 +2,10 @@
 using BulkPaymentWeb.Application.Interfaces.Services.ExcelParser;
 using BulkPaymentWeb.Application.Interfaces.Validator;
 using BulkPaymentWeb.Domain.Entities;
+using BulkPaymentWeb.Domain.Enums;
 using BulkPaymentWeb.Infrastructure.Data;
 using BulkPaymentWeb.Infrastructure.Data.Hubs;
+using BulkPaymentWeb.Infrastructure.Interfaces.Jobs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -45,22 +47,23 @@ namespace BulkPaymentWeb.Infrastructure.Jobs
             try
             {
                 // 1. Обновляем статус в БД.
-                PaymentRegistryEntity? registry = await dbContext.Registries.FindAsync(registryId);
+                RegistryEntity? registry = await dbContext.Registries.FindAsync(registryId);
 
                 if (registry == null) return;
 
-                registry.Status = "Processing";
+                registry.Status = RegistryStatusEnum.Processing.ToString();
+
                 await dbContext.SaveChangesAsync();
 
                 // 2. Парсим файл.
-                List<PaymentItemEntity> items;
-                using (FileStream stream = File.OpenRead(filePath))
-                {
-                    items = parser.ParseStream(stream, registryId);
-                }
+                using FileStream stream = File.OpenRead(filePath);
 
-                int total = items.Count;
+                IEnumerable<PaymentItemEntity> items = parser.ParseStream(stream, registryId);
+
+                int total = items.Count();
                 int processed = 0;
+
+                int errorCount = 0;
 
                 // 3. Валидируем и сохраняем порциями (Batching).
                 foreach (var item in items)
@@ -68,12 +71,17 @@ namespace BulkPaymentWeb.Infrastructure.Jobs
                     validator.Validate(item);
                     dbContext.Payments.Add(item);
 
+                    if (!item.IsValid)
+                    {
+                        errorCount++;
+                    }
+
                     processed++;
 
                     // Отправляем прогресс каждые 5 строк.
-                    if (processed % 2 == 0 || processed == total)
+                    if (processed % 5 == 0 || processed == total)
                     {
-                        await Task.Delay(1500);
+                        //await Task.Delay(1500);
                         int percent = (int)((double)processed / total * 100);
 
                         Console.WriteLine($"Отправка в группу {registryId}. Прогресс: {percent}%");
@@ -85,15 +93,17 @@ namespace BulkPaymentWeb.Infrastructure.Jobs
                                 Percent = percent,
                                 ProcessedRows = processed,
                                 TotalRows = total,
-                                Status = "Processing",
-                                ErrorCount = items.Take(processed).Count(x => !x.IsValid)
+                                Status = RegistryStatusEnum.Processing.ToString(),
+                                ErrorCount = errorCount
                             });
                     }
                 }
 
                 // 4. Финализация.
-                registry.Status = "Completed";
+                registry.Status = RegistryStatusEnum.Completed.ToString();
                 await dbContext.SaveChangesAsync();
+
+
 
                 // Уведомляем о завершении
                 await _paymentHub.Clients.Group(registryId.ToString()).SendAsync("UpdateProgress",
@@ -103,23 +113,26 @@ namespace BulkPaymentWeb.Infrastructure.Jobs
                         Percent = 100,
                         ProcessedRows = total,
                         TotalRows = total,
-                        Status = "Completed"
+                        Status = RegistryStatusEnum.Completed.ToString()
                     });
             }
 
             catch (Exception ex)
             {
-                // Обработка критической ошибки
-                PaymentRegistryEntity? registry = await dbContext.Registries.FindAsync(registryId);
+                _logger.LogError(ex, "Критическая ошибка обработки реестра: {Message}", ex.Message);
+
+                dbContext.ChangeTracker.Clear();
+
+                RegistryEntity? registry = await dbContext.Registries.FindAsync(registryId);
                 if (registry != null)
                 {
-                    registry.Status = "Failed";
+                    registry.Status = RegistryStatusEnum.Failed.ToString();
                     await dbContext.SaveChangesAsync();
                 }
 
+                // Отправляем ошибку на фронт
                 await _paymentHub.Clients.Group(registryId.ToString()).SendAsync("ErrorMessage", ex.Message);
 
-                _logger.LogError(ex, ex.Message);
                 throw;
             }
 

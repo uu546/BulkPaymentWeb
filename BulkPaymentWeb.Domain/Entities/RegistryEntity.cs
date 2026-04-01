@@ -3,7 +3,7 @@
     /// <summary>
     /// Класс реестра платежей.
     /// </summary>
-    public class PaymentRegistryEntity
+    public class RegistryEntity
     {
         /// <summary>
         /// PK.

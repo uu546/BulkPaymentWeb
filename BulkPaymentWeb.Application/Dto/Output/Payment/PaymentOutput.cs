@@ -1,49 +1,43 @@
-﻿namespace BulkPaymentWeb.Domain.Entities
+﻿namespace BulkPaymentWeb.Application.Dto.Output.Payment
 {
     /// <summary>
-    /// Класс платежа из реестра.
+    /// Класс выходной модели платежа.
     /// </summary>
-    public class PaymentItemEntity
+    public class PaymentOutput
     {
-        /// <summary>
         /// PK.
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Навигационное свойство.
-        /// </summary>
-        public RegistryEntity? PaymentRegistryEntity { get; set; }
-
-        /// <summary>
-        /// FK Id реестра.
+        /// Id реестра.
         /// </summary>
         public int RegistryId { get; set; }
 
         /// <summary>
         /// ИНН организации, которая платит.
         /// </summary>
-        public string PayerInn { get; set; }
+        public string? PayerInn { get; set; }
 
         /// <summary>
         /// Расчетный счет плательщика.
         /// </summary>
-        public string PayerAccount { get; set; }
+        public string? PayerAccount { get; set; }
 
         /// <summary>
         /// ИНН организации, которая получает деньги.
         /// </summary>
-        public string ReceiverInn { get; set; }
+        public string? ReceiverInn { get; set; }
 
         /// <summary>
         /// Расчет счет получателя.
         /// </summary>
-        public string ReceiverAccount { get; set; }
+        public string? ReceiverAccount { get; set; }
 
         /// <summary>
         /// Банковский Идентификационный Код банка получателя.
         /// </summary>
-        public string ReceiverBik { get; set; }
+        public string? ReceiverBik { get; set; }
 
         /// <summary>
         /// Сумма платежа.
@@ -53,7 +47,7 @@
         /// <summary>
         /// Текстовое описание: за что переводятся деньги.
         /// </summary>
-        public string Purpose { get; set; }
+        public string? Purpose { get; set; }
 
         /// <summary>
         /// Признак: прошел ли платеж валидацию.

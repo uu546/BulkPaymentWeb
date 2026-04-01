@@ -20,9 +20,4 @@ export class PaymentService {
       formData,
     );
   }
-
-  // Метод для получения списка платежей после завершения
-  public getPayments(registryId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/registries/${registryId}/payments`);
-  }
 }

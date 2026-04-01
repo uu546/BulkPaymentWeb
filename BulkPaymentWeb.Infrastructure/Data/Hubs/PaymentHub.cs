@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using BulkPaymentWeb.Application.Dto.Output.Payment;
+using BulkPaymentWeb.Application.Interfaces.Services.Payment;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BulkPaymentWeb.Infrastructure.Data.Hubs
 {
@@ -7,6 +9,20 @@ namespace BulkPaymentWeb.Infrastructure.Data.Hubs
     /// </summary>
     public class PaymentHub : Hub
     {
+        private readonly IPaymentService _paymentService;
+
+        public PaymentHub(IPaymentService paymentService)
+        {
+            _paymentService = paymentService;
+        }
+
+        public async Task<IEnumerable<PaymentOutput>> GetPaymentsByRegistryIdAsync(int registryId)
+        {
+            IEnumerable<PaymentOutput> payments = await _paymentService.GetPaymentsByRegistryIdAsync(registryId);
+
+            return payments;
+        }
+
         /// <summary>
         /// Метод подключает клиента к группе конкретного реестра. 
         /// </summary>

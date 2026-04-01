@@ -1,4 +1,4 @@
-﻿namespace BulkPaymentWeb.Infrastructure.Jobs
+﻿namespace BulkPaymentWeb.Infrastructure.Interfaces.Jobs
 {
     /// <summary>
     /// Интерфейс фонового обработчика реестра платежей.

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace BulkPaymentWeb.Application.Interfaces.Services.FileStorageService
+namespace BulkPaymentWeb.Application.Interfaces.Services.FileStorage
 {
     /// <summary>
     /// Интерфейс сервиса хранения и удаления файлов.

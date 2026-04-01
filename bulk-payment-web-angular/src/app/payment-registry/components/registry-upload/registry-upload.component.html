@@ -45,6 +45,9 @@
     <button class="btn-upload" (click)="uploadFile()">Начать обработку</button>
   }
 
+  @if (globalError) {
+    <div class="error-alert"><strong>⚠️ Ошибка обработки:</strong> {{ globalError }}</div>
+  }
   @if (uploadProgress && uploadProgress.status !== 'Completed') {
     <div class="progress-section">
       <h3>Статус обработки: {{ uploadProgress.status }}</h3>
@@ -70,6 +73,7 @@
       <table class="payment-table">
         <thead>
           <tr>
+            <th>№</th>
             <th>Id реестра</th>
             <th>Статус</th>
             <th>ИНН Плат.</th>
@@ -79,17 +83,19 @@
             <th>БИК</th>
             <th>Сумма</th>
             <th>Назначение</th>
+            <th>Текст ошибок</th>
           </tr>
         </thead>
         <tbody>
           @for (p of payments; track $index) {
             <tr [class.row-error]="!p.isValid">
+              <td>{{ $index + 1 }}</td>
               <td>{{ p.registryId }}</td>
               <td class="status-cell">
                 @if (p.isValid) {
-                  <span class="icon-success" title="Валиден">✔</span>
+                  <span class="icon-success" title="Валиден">✅</span>
                 } @else {
-                  <span class="icon-error" [title]="p.validationError">✘</span>
+                  <span class="icon-error" [title]="p.validationError">❌</span>
                 }
               </td>
               <td>{{ p.payerInn }}</td>
@@ -99,6 +105,7 @@
               <td>{{ p.receiverBik }}</td>
               <td class="amount-cell">{{ p.amount | currency: 'RUB' : 'symbol-narrow' }}</td>
               <td class="purpose-cell" [title]="p.purpose">{{ p.purpose }}</td>
+              <td>{{ p.validationError }}</td>
             </tr>
           }
         </tbody>

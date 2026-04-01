@@ -1,12 +1,14 @@
-﻿using BulkPaymentWeb.Application.Interfaces.Services.FileStorageService;
+﻿using BulkPaymentWeb.Application.Interfaces.Services.FileStorage;
 using BulkPaymentWeb.Domain.Entities;
+using BulkPaymentWeb.Domain.Enums;
 using BulkPaymentWeb.Infrastructure.Data;
+using BulkPaymentWeb.Infrastructure.Interfaces.Jobs;
 using BulkPaymentWeb.Infrastructure.Interfaces.PaymentRegistry;
-using BulkPaymentWeb.Infrastructure.Jobs;
 using Hangfire;
 using Microsoft.AspNetCore.Http;
 namespace BulkPaymentWeb.Application.Services.PaymentRegistry
 {
+
     public class PaymentRegistryService : IPaymentRegistryService
     {
         private readonly ApplicationDbContext _dbContext;
@@ -24,11 +26,12 @@ namespace BulkPaymentWeb.Application.Services.PaymentRegistry
 
         public async Task<int> CreateAndSendEnqueueAsync(IFormFile file)
         {
-            PaymentRegistryEntity registry = new PaymentRegistryEntity
+        
+            RegistryEntity registry = new RegistryEntity
             {
                 FileName = file.FileName,
                 UploadedAt = DateTime.UtcNow,
-                Status = "Created"
+                Status = RegistryStatusEnum.Created.ToString()
             };
 
             _dbContext.Registries.Add(registry);

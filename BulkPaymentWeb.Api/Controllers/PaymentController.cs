@@ -1,7 +1,5 @@
-﻿using BulkPaymentWeb.Infrastructure.Data;
-using BulkPaymentWeb.Infrastructure.Interfaces.PaymentRegistry;
+﻿using BulkPaymentWeb.Infrastructure.Interfaces.PaymentRegistry;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace BulkPaymentWeb.Api.Controllers
 {
@@ -42,44 +40,6 @@ namespace BulkPaymentWeb.Api.Controllers
                 RegistryId = registryId,
                 Message = "Файл принят в обработку."
             });
-        }
-
-        /// <summary>
-        /// Метод получает список платежей реестра.
-        /// </summary>
-        /// <param name="registryId">Id реестра.</param>
-        /// <returns>Список платажей реестра.</returns>
-        [HttpGet("registries/{registryId}/payments")]
-        public async Task<IActionResult> GetPaymentsAsync([FromRoute] int registryId,
-            [FromServices] ApplicationDbContext dbContext)
-        {
-            bool registryExists = await dbContext.Registries.AnyAsync(r => r.Id == registryId);
-
-            if (!registryExists)
-            {
-                return NotFound("Реестр не найден.");
-            }
-
-            var payments = await dbContext.Payments
-                .Where(p => p.RegistryId == registryId)
-                .OrderBy(p => p.Id)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.RegistryId,
-                    p.PayerInn,
-                    p.PayerAccount,
-                    p.ReceiverInn,
-                    p.ReceiverAccount,
-                    p.ReceiverBik,
-                    p.Amount,
-                    p.Purpose,
-                    p.IsValid,
-                    p.ValidationError
-                })
-                .ToListAsync();
-
-            return Ok(payments);
         }
     }
 }

@@ -91,3 +91,13 @@
   color: #dc3545;
   font-weight: bold;
 }
+
+.error-alert {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 16px;
+  border-left: 6px solid #d32f2f;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-family: sans-serif;
+}

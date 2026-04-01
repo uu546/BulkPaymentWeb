@@ -1,9 +1,12 @@
-﻿using BulkPaymentWeb.Application.Interfaces.Services.ExcelParser;
-using BulkPaymentWeb.Application.Interfaces.Services.FileStorageService;
+﻿using BulkPaymentWeb.Application.Interfaces.Repositories.Payment;
+using BulkPaymentWeb.Application.Interfaces.Services.ExcelParser;
+using BulkPaymentWeb.Application.Interfaces.Services.FileStorage;
 using BulkPaymentWeb.Application.Services.PaymentRegistry;
 using BulkPaymentWeb.Infrastructure.Data;
+using BulkPaymentWeb.Infrastructure.Interfaces.Jobs;
 using BulkPaymentWeb.Infrastructure.Interfaces.PaymentRegistry;
 using BulkPaymentWeb.Infrastructure.Jobs;
+using BulkPaymentWeb.Infrastructure.Repositories;
 using BulkPaymentWeb.Infrastructure.Services;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -37,6 +40,7 @@ namespace BulkPaymentWeb.Infrastructure
             ServicesInit(services);
             HangfireInit(services, connectionString);
             JobInit(services);
+            RepositoriesInit(services);
 
             return services;
         }
@@ -50,6 +54,15 @@ namespace BulkPaymentWeb.Infrastructure
             services.AddScoped<IExcelParserService, ExcelParserService>();
             services.AddScoped<IFileStorageService, LocalFileStorageService>();
             services.AddScoped<IPaymentRegistryService, PaymentRegistryService>();
+        }
+
+        /// <summary>
+        /// Метод регистрирует сервисы.
+        /// </summary>
+        /// <param name="services">Регистрация зависимостей.</param>
+        private static void RepositoriesInit(IServiceCollection services)
+        {
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
         }
 
         private static void JobInit(IServiceCollection services)

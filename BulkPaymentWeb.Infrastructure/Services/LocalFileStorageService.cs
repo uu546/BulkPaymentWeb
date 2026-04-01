@@ -1,4 +1,5 @@
-﻿using BulkPaymentWeb.Application.Interfaces.Services.FileStorageService;
+﻿
+using BulkPaymentWeb.Application.Interfaces.Services.FileStorage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
